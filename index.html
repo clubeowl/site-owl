@@ -159,6 +159,7 @@ footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:2
 @keyframes dr{to{stroke-dashoffset:0}}
 .ok h2{font-size:clamp(1.6rem,3vw,2.3rem)}
 .ok small{display:block;margin-top:18px;opacity:.8}
+#frm .wrap.solo{grid-template-columns:1fr;max-width:680px;align-content:center;min-height:55vh}
 @media (max-width:900px){
 .hero{min-height:0;padding-top:100px}
 .hero .wrap,.pres .wrap,.contact,#frm .wrap{grid-template-columns:1fr;gap:40px}
@@ -239,7 +240,7 @@ section{padding:72px 0}.pres{padding-top:72px}
 
 <main id="frm" hidden>
 <div class="wrap">
-<div>
+<div id="fl">
 <a class="back" href="#top">← Voltar ao site</a>
 <span class="eyebrow" style="display:block;width:max-content">Atendimento personalizado</span>
 <h1 class="title">Conte sobre o seu negócio</h1>
@@ -261,7 +262,7 @@ section{padding:72px 0}.pres{padding-top:72px}
 <button class="btn full" type="submit">Enviar</button>
 <div class="msg full" id="m2" role="status"></div>
 </form>
-<div class="ok" id="ok" hidden><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/></svg><h2>Recebemos seu contato e um dos nossos consultores entrará em contato contigo.</h2><small id="demo" hidden></small></div>
+<div class="ok" id="ok" hidden><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/></svg><h2>Recebemos seu contato e um dos nossos consultores entrará em contato contigo.</h2><small id="demo" hidden></small><a class="btn" href="#top" style="margin-top:30px;background:var(--y);color:var(--n);border-color:var(--y)">Voltar ao site</a></div>
 </div>
 </div>
 </main>
@@ -284,7 +285,8 @@ mb.onclick=function(){menu(true)};$('#x').onclick=ov.onclick=function(){menu(fal
 $$('#dr a').forEach(function(a){a.addEventListener('click',function(){menu(false)})});
 addEventListener('keydown',function(e){if(e.key=='Escape')menu(false)});
 /* rotas */
-function route(){var f=location.hash=='#/formulario';$('#home').hidden=f;$('#frm').hidden=!f;document.body.classList.toggle('isf',f);
+function resetForm(){var f=$('#f2'),b=$('button',f);f.hidden=false;f.reset();$('#qt').hidden=true;b.disabled=false;b.textContent='Enviar';$('#ok').hidden=true;$('#fl').hidden=false;$('#frm .wrap').classList.remove('solo')}
+function route(){var f=location.hash=='#/formulario';if(f&&!$('#ok').hidden)resetForm();$('#home').hidden=f;$('#frm').hidden=!f;document.body.classList.toggle('isf',f);
 var id=location.hash.slice(1),el=!f&&id&&document.getElementById(id);setTimeout(function(){el?el.scrollIntoView():scrollTo(0,0)},30)}
 addEventListener('hashchange',route);if(location.hash=='#/formulario')route();
 addEventListener('scroll',function(){hd.classList.toggle('s',scrollY>10)},{passive:true});
@@ -331,7 +333,7 @@ var rd=f2.elements['Time interno'].value;if(!rd)ok=false;
 if(!ok){$('#m2').textContent='Preencha todos os campos para enviar.';return}
 $('#m2').textContent='';d['Time interno']=rd;
 var btn=$('button',f2);btn.disabled=true;btn.textContent='Enviando...';
-function done(demo){f2.hidden=true;$('#ok').hidden=false;if(demo){var s=$('#demo');s.hidden=false;s.textContent='Modo de teste: a chave do formulário ainda não foi configurada, então estes dados não foram enviados.'}scrollTo(0,0)}
+function done(demo){f2.hidden=true;$('#ok').hidden=false;$('#fl').hidden=true;$('#frm .wrap').classList.add('solo');if(demo){var s=$('#demo');s.hidden=false;s.textContent='Modo de teste: a chave do formulário ainda não foi configurada, então estes dados não foram enviados.'}scrollTo(0,0)}
 if(ACCESS_KEY=='COLE_SUA_CHAVE_AQUI'){done(true);return}
 d.access_key=ACCESS_KEY;d.subject='Novo contato pelo site Owl: '+d.Nome+' ('+d.Empresa+')';d.from_name='Site Owl';
 fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(d)})
