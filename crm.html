@@ -52,8 +52,8 @@ button{cursor:pointer}
 #nav svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 #nav em{margin-left:auto;font-style:normal;font-size:.75rem;opacity:.7}
 .sbf{margin-top:auto;display:grid;gap:10px}
-.sy{display:flex;align-items:center;gap:8px;font-size:.78rem;opacity:.85;padding:0 8px}
-.sy i{width:8px;height:8px;border-radius:50%;background:#d9822b}
+.sy{display:flex;align-items:flex-start;gap:8px;font-size:.78rem;opacity:.9;padding:0 8px;line-height:1.3}
+.sy i{width:8px;height:8px;border-radius:50%;background:#d9822b;flex:none;margin-top:4px}
 .sy.ok i{background:#5be08f}.sy.er i{background:#ff6b6b}
 .usr{display:flex;gap:10px;align-items:center;border:1px solid rgba(255,249,82,.3);background:none;color:inherit;padding:10px;border-radius:12px;text-align:left}
 .usr:hover{background:rgba(255,249,82,.1)}
@@ -125,14 +125,34 @@ button{cursor:pointer}
 #hist small{color:var(--mu)}
 .ts{position:fixed;left:50%;bottom:24px;transform:translate(-50%,120px);background:var(--n);color:var(--y);padding:12px 22px;border-radius:10px;font-weight:700;transition:transform .35s;z-index:60}
 .ts.on{transform:translate(-50%,0)}
+.lc input+input{margin-top:10px}
+.fg{background:none;border:0;color:var(--y);opacity:.8;margin-top:14px;text-decoration:underline;padding:0}
+#team{padding:4px 24px 24px;overflow:auto;flex:1}
+.tw{display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start}
+.uf{background:#fff;border:1px solid var(--ln);border-radius:14px;padding:20px;display:grid;gap:14px}
+.uf h3{font:800 1.1rem var(--display);margin:0}
+.uf label{display:grid;gap:5px;font-weight:700;font-size:.82rem}
+.uf input,.uf select{border:2px solid var(--ln);border-radius:10px;padding:10px 12px;background:#fff;width:100%}
+.uf input:focus,.uf select:focus{outline:0;border-color:var(--n)}
+.er2{min-height:1.2em;color:var(--rd);font-weight:700;font-size:.85rem}
+.tt{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--ln);border-radius:14px;overflow:hidden}
+.tt th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);padding:12px 14px;background:#f7f8f3}
+.tt td{padding:12px 14px;border-top:1px solid #eef0e8}
+.tt .ac{text-align:right;white-space:nowrap}
+.tt .ac button{border:1px solid var(--ln);background:none;border-radius:8px;padding:5px 10px;font-weight:700;margin-left:6px;color:var(--n)}
+.tt .ac button:hover{background:var(--n);color:var(--y)}
+.st{border-radius:6px;padding:2px 9px;font-size:.75rem;font-weight:700}.st.on{background:#e3f4ea;color:#1d7a4d}.st.of{background:#fde3e1;color:var(--rd)}
+.tg{font-style:normal;background:var(--bg);border-radius:6px;padding:1px 7px;font-weight:700;color:var(--n);font-size:.72rem}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div id="login"><div class="lv"><span class="logo"></span></div><div class="lr"><form class="lc" id="lf">
-<h1>Owl CRM</h1><p>Digite a senha para entrar.</p>
+<h1>Owl CRM</h1><p id="lp">Digite a senha para entrar.</p>
+<input id="em" type="email" placeholder="E-mail" autocomplete="username" hidden>
 <input id="pw" type="password" placeholder="Senha" autocomplete="current-password" autofocus>
 <button class="btn" type="submit">Entrar</button>
+<button type="button" class="fg" id="fg" hidden>Esqueci minha senha</button>
 <div class="er" id="le" role="alert"></div>
 </form></div></div>
 
@@ -143,6 +163,7 @@ button{cursor:pointer}
 <button data-b="com"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Comercial<em></em></button>
 <button data-b="cri"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg>Criativo<em></em></button>
 <button data-b="cli"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.5 3.3-5.5 6.5-5.5s5.9 2 6.5 5.5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.5c2.5.2 4 1.8 4.5 4.5"/></svg>Clientes<em></em></button>
+<button data-b="eq" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.6-4 3.4-6 7-6s6.4 2 7 6"/></svg>Equipe<em></em></button>
 </nav>
 <div class="sbf">
 <div class="sy" id="sync"><i></i><span></span></div>
@@ -154,6 +175,7 @@ button{cursor:pointer}
 <div class="bn" id="bn" hidden>Modo local: os dados ficam só neste navegador (Firebase não configurado).</div>
 <header class="tb"><div><h1 id="ttl"></h1><p id="sbt"></p></div>
 <div class="tr"><div class="sr"><input id="q" type="search" placeholder="Buscar cards..." aria-label="Buscar"></div><button class="btn o" id="exp">Exportar CSV</button><button class="btn" id="new">+ Novo card</button></div></header>
+<section id="team" hidden><div class="tw"><form id="uf" class="uf" novalidate><h3>Novo usuário</h3><label>Nome<input name="n" autocomplete="off"></label><label>E-mail<input name="e" type="email" autocomplete="off"></label><label>Senha temporária<input name="p" type="text" autocomplete="off" placeholder="mínimo 6 caracteres"></label><label>Perfil<select name="ro"><option value="member">Membro</option><option value="admin">Administrador</option></select></label><button class="btn" type="submit">Criar usuário</button><div class="er2" id="ue" role="alert"></div></form><div id="tm"></div></div></section>
 <div class="kp" id="kp"></div>
 <div class="bw"><main id="bd"></main>
 </div>
@@ -186,18 +208,18 @@ button{cursor:pointer}
 <script>
 (function(){
 /* ====== CONFIGURAÇÃO (Firebase) ====== */
-var FB={apiKey:'AIzaSyAKt9bzn2tyCfIkllZ6l4I_VB_M4ky5fIU',dbUrl:'https://owl-crm-2026-default-rtdb.firebaseio.com',email:'equipe@clubeowl.com'};
+var FB={apiKey:'AIzaSyAKt9bzn2tyCfIkllZ6l4I_VB_M4ky5fIU',dbUrl:'https://owl-crm-2026-default-rtdb.firebaseio.com'};
 /* ===================================== */
 var PWH='cddfd50ad7427f879fa055ad6d158b6b8d579bce939d5f68aa039210a8f632b1',cloud=!!(FB.apiKey&&FB.dbUrl);
 var $=function(s,r){return (r||document).querySelector(s)},$$=function(s,r){return [].slice.call((r||document).querySelectorAll(s))};
 var COLS={com:[['novo','Novo lead','#244669'],['contato','Contato feito','#4f7cac'],['proposta','Proposta enviada','#c9a400'],['neg','Negociação','#d9822b'],['fechado','Fechado','#2e9e6b'],['perdido','Perdido','#8a94a3']],
 cri:[['briefing','Briefing','#244669'],['copy','Roteiro e copy','#4f7cac'],['criacao','Em criação','#c9a400'],['revisao','Revisão','#d9822b'],['aprovado','Aprovado','#2e9e6b'],['publicado','Publicado','#5b4fa8']],
 cli:[['ativo','Ativos','#2e9e6b'],['inad','Inadimplentes','#d9822b'],['enc','Encerrados','#8a94a3']]};
-var NM={com:'Comercial',cri:'Criativo',cli:'Clientes'},SB={com:'Funil de vendas',cri:'Fluxo de criação de conteúdo',cli:'Carteira de clientes'};
+var NM={com:'Comercial',cri:'Criativo',cli:'Clientes',eq:'Equipe'},SB={com:'Funil de vendas',cri:'Fluxo de criação de conteúdo',cli:'Carteira de clientes',eq:'Usuários com acesso ao painel'};
 var LBL={com:{title:'Empresa ou lead',sub:'Nome do contato',val:'Valor da proposta (R$)',resp:'Responsável',due:'Próximo contato'},cri:{title:'Conteúdo ou peça',sub:'Cliente',resp:'Responsável',due:'Prazo de entrega'},cli:{title:'Cliente',sub:'Nome do contato',val:'Mensalidade (R$)',resp:'Gestor da conta',due:'Próximo vencimento'}};
 var SHOW={com:['tel','val','orig'],cri:[],cli:['tel','val']},DONE={com:['fechado','perdido'],cri:['aprovado','publicado'],cli:['enc']};
 var FN={title:'nome',sub:'contato',tel:'telefone',val:'valor',resp:'responsável',orig:'origem',due:'prazo',note:'observações'};
-var S={cards:{},log:[]},tab='com',user=localStorage.getItem('owlname')||'',drag=null,pend=null,editId=null,quiet=0,T={},q='';
+var S={cards:{},log:[]},tab='com',ME={},user=cloud?'':(localStorage.getItem('owlname')||''),drag=null,pend=null,editId=null,quiet=0,T={},q='';
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function money(v){return Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0})}
 function when(t){return new Date(t).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}
@@ -210,18 +232,21 @@ function flash(t){var e=$('#ts');e.textContent=t;e.classList.add('on');setTimeou
 /* ---- backend ---- */
 function tok(){if(T.id&&Date.now()<T.exp-60000)return Promise.resolve(T.id);
 return fetch('https://securetoken.googleapis.com/v1/token?key='+FB.apiKey,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=refresh_token&refresh_token='+encodeURIComponent(T.rf)}).then(function(r){return r.json()}).then(function(j){if(!j.id_token)throw 0;T={id:j.id_token,rf:j.refresh_token,exp:Date.now()+j.expires_in*1000};localStorage.setItem('owlrf',T.rf);return T.id})}
-function api(m,p,b){return tok().then(function(t){return fetch(FB.dbUrl.replace(/\/$/,'')+'/'+p+(p.indexOf('?')<0?'?':'&')+'auth='+t,{method:m,body:b?JSON.stringify(b):undefined})}).then(function(r){if(!r.ok)throw 0;return r.json()})}
-function login(pw){return fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key='+FB.apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:FB.email,password:pw,returnSecureToken:true})}).then(function(r){return r.json()}).then(function(j){if(!j.idToken)throw new Error(j.error&&j.error.message||'ERRO');T={id:j.idToken,rf:j.refreshToken,exp:Date.now()+j.expiresIn*1000};localStorage.setItem('owlrf',T.rf)})}
+function api(m,p,b){return tok().then(function(t){return fetch(FB.dbUrl.replace(/\/$/,'')+'/'+p.replace(/\?|$/,'.json$&')+(p.indexOf('?')<0?'?':'&')+'auth='+t,{method:m,body:b?JSON.stringify(b):undefined})}).then(function(r){if(!r.ok){var e=new Error('HTTP '+r.status);e.status=r.status;throw e}return r.json()})}
+function login(em,pw){return fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key='+FB.apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em,password:pw,returnSecureToken:true})}).then(function(r){return r.json()}).then(function(j){if(!j.idToken)throw new Error(j.error&&j.error.message||'ERRO');T={id:j.idToken,rf:j.refreshToken,exp:Date.now()+j.expiresIn*1000};ME={uid:j.localId,email:j.email||em};localStorage.setItem('owlrf',T.rf);localStorage.setItem('owluid',ME.uid);localStorage.setItem('owlmail',ME.email)})}
+function reset(em){return fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key='+FB.apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requestType:'PASSWORD_RESET',email:em})}).then(function(r){return r.json()}).then(function(j){if(j.error)throw new Error(j.error.message);return j})}
+function profile(){return api('GET','users/'+ME.uid).then(function(p){if(p)return p;return api('PUT','users/'+ME.uid,{name:(ME.email||'').split('@')[0],email:ME.email,role:'admin',active:true,c:Date.now()}).catch(function(){throw new Error('NAOLIBERADO')})}).then(function(p){if(p.active===false)throw new Error('INATIVO');ME.name=p.name||ME.email;ME.role=p.role||'member';user=ME.name;return p})}
 function sha(s){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(b){return [].map.call(new Uint8Array(b),function(x){return ('0'+x.toString(16)).slice(-2)}).join('')})}
 function lget(){try{return JSON.parse(localStorage.getItem('owlcrm'))||{cards:{},log:[]}}catch(e){return {cards:{},log:[]}}}
 function load(){if(!cloud)return Promise.resolve(lget());
 return Promise.all([api('GET','cards'),api('GET','log?orderBy=%22%24key%22&limitToLast=300')]).then(function(r){return {cards:r[0]||{},log:Object.keys(r[1]||{}).map(function(k){return r[1][k]})}})}
 function ls(){localStorage.setItem('owlcrm',JSON.stringify(S))}
-function bad(){flash('Não foi possível salvar. Verifique a conexão.')}
-function sync(ok){var s=$('#sync');s.className='sy '+(cloud?(ok?'ok':'er'):'');$('span',s).textContent=cloud?(ok?'Sincronizado':'Sem conexão'):'Modo local'}
+function bad(x){flash('Não foi possível salvar: '+diag(x))}
+function diag(x){var s=x&&x.status;return s==401||s==403?'sem permissão, confira as regras do banco':s==404?'endereço do banco incorreto':s?'erro '+s:'sem acesso ao banco (internet ou bloqueio)'}
+function sync(ok,x){var s=$('#sync');s.className='sy '+(cloud?(ok?'ok':'er'):'');$('span',s).textContent=cloud?(ok?'Sincronizado':'Sem conexão: '+diag(x)):'Modo local'}
 function saveCard(c,e){S.cards[c.id]=c;S.log.push(e);quiet=Date.now()+4000;ui();if(cloud){api('PUT','cards/'+c.id,c).catch(bad);api('POST','log',e).catch(bad)}else ls()}
 function delCard(id,e){delete S.cards[id];S.log.push(e);quiet=Date.now()+4000;ui();if(cloud){api('DELETE','cards/'+id).catch(bad);api('POST','log',e).catch(bad)}else ls()}
-function refresh(){if(drag||$('.md.on')||Date.now()<quiet)return;load().then(function(d){S=d;ui();sync(true)}).catch(function(){sync(false)})}
+function refresh(){if(tab=='eq'||drag||$('.md.on')||Date.now()<quiet)return;load().then(function(d){S=d;ui();sync(true)}).catch(function(x){sync(false,x)})}
 /* ---- render ---- */
 function match(c){return !q||[c.title,c.sub,c.resp,c.tel,c.note].join(' ').toLowerCase().indexOf(q)>=0}
 function cardH(c,col){var od=c.due&&c.due<today()&&DONE[c.b].indexOf(c.col)<0,rs=c.resp||'Sem responsável';
@@ -236,9 +261,21 @@ if(tab=='com'){var o=n(['novo','contato','proposta','neg']),f=n(['fechado']),p=n
 else if(tab=='cri'){var t=today(),at=l.filter(function(c){return c.due&&c.due<t&&DONE.cri.indexOf(c.col)<0});k=[['Em produção',n(['briefing','copy','criacao']).length,'briefing, copy e criação'],['Em revisão',n(['revisao']).length,'aguardando ajustes'],['Atrasados',at.length,'prazo vencido'],['Publicados',n(['publicado']).length,'entregues']]}
 else{var a=n(['ativo']),i=n(['inad']);k=[['Clientes ativos',a.length,'na carteira'],['Receita mensal',money(sm(a)),'soma das mensalidades'],['Inadimplentes',i.length,money(sm(i))+' em atraso'],['Encerrados',n(['enc']).length,'contratos finalizados']]}
 $('#kp').innerHTML=k.map(function(x){return '<div class="k"><small>'+x[0]+'</small><b>'+x[1]+'</b><span>'+x[2]+'</span></div>'}).join('')}
-function ui(){$('#ttl').textContent=NM[tab];$('#sbt').textContent=SB[tab];
-$$('#nav button').forEach(function(b){var k=b.dataset.b;b.classList.toggle('on',k==tab);$('em',b).textContent=bl(k).length});kpi();board()}
-function chip(){$('#un').textContent=user||'Informe seu nome';$('#av').textContent=user?user.charAt(0).toUpperCase():'?'}
+function ui(){var eq=tab=='eq';$('#ttl').textContent=NM[tab];$('#sbt').textContent=SB[tab];
+$$('#nav button').forEach(function(b){var k=b.dataset.b;b.classList.toggle('on',k==tab);if(k!='eq')$('em',b).textContent=bl(k).length});
+['#kp','.bw','.sr','#exp','#new'].forEach(function(s){$(s).hidden=eq});$('#team').hidden=!eq;if(eq)return team();kpi();board()}
+function team(){var box=$('#tm');box.innerHTML='<div class="emp">Carregando...</div>';
+api('GET','users').then(function(u){u=u||{};var l=Object.keys(u).map(function(k){var x=u[k];x.id=k;return x}).sort(function(a,b){return String(a.name).localeCompare(String(b.name))});
+box.innerHTML='<table class="tt"><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th></th></tr></thead><tbody>'+l.map(function(x){var me=x.id==ME.uid,off=x.active===false;return '<tr><td><b>'+esc(x.name)+'</b>'+(me?' <em class="tg">você</em>':'')+'</td><td>'+esc(x.email)+'</td><td>'+(x.role=='admin'?'Administrador':'Membro')+'</td><td><span class="st '+(off?'of':'on')+'">'+(off?'Desativado':'Ativo')+'</span></td><td class="ac">'+(me?'':'<button data-a="tg" data-id="'+x.id+'" data-v="'+(off?1:0)+'" data-n="'+esc(x.name)+'">'+(off?'Reativar':'Desativar')+'</button>')+'<button data-a="rs" data-m="'+esc(x.email)+'">Redefinir senha</button></td></tr>'}).join('')+'</tbody></table>'}).catch(function(x){box.innerHTML='<div class="emp">Não foi possível carregar a equipe ('+diag(x)+').</div>'})}
+function alog(t){api('POST','log',{ts:Date.now(),user:ME.name,b:'eq',text:t,cid:''}).catch(function(){})}
+$('#tm').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+if(b.dataset.a=='tg'){var on=b.dataset.v=='1';api('PATCH','users/'+b.dataset.id,{active:on}).then(function(){alog((on?'reativou':'desativou')+' o usuário '+b.dataset.n);team()}).catch(bad)}
+else reset(b.dataset.m).then(function(){flash('Link de redefinição enviado para '+b.dataset.m)}).catch(function(){flash('Não foi possível enviar agora.')})});
+$('#uf').onsubmit=function(e){e.preventDefault();var f=e.target.elements,n=f.n.value.trim(),em=f.e.value.trim().toLowerCase(),p=f.p.value,ro=f.ro.value,m=$('#ue'),bt=$('button',e.target);m.textContent='';
+if(!n||!/^\S+@\S+\.\S+$/.test(em)||p.length<6){m.textContent='Preencha nome, e-mail válido e senha com pelo menos 6 caracteres.';return}
+bt.disabled=true;
+fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key='+FB.apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em,password:p,returnSecureToken:false})}).then(function(r){return r.json()}).then(function(j){if(j.error)throw new Error(j.error.message);return api('PUT','users/'+j.localId,{name:n,email:em,role:ro,active:true,c:Date.now(),by:ME.name})}).then(function(){alog('criou o usuário '+n+' ('+em+')');e.target.reset();flash('Usuário criado. Passe a senha temporária para '+n+'.');team()}).catch(function(x){var s=String(x&&x.message||'');m.textContent=/EMAIL_EXISTS/.test(s)?'Este e-mail já tem conta no Firebase. Use outro e-mail ou apague a conta antiga em Authentication.':/WEAK_PASSWORD/.test(s)?'Senha fraca: use pelo menos 6 caracteres.':/OPERATION_NOT_ALLOWED/.test(s)?'O cadastro por e-mail/senha está bloqueado no Firebase.':'Não foi possível criar ('+diag(x)+').'}).then(function(){bt.disabled=false})};
+function chip(){$('#un').textContent=user||'Informe seu nome';$('#av').textContent=user?user.charAt(0).toUpperCase():'?';$('#who small').textContent=cloud?(ME.role=='admin'?'Administrador':'Membro'):'Trocar nome'}
 /* ---- ações ---- */
 function need(fn){if(user)fn();else{pend=fn;openM('#mn');$('#nf').elements.n.focus()}}
 function log(b,t,cid){return {ts:Date.now(),user:user,b:b,text:t,cid:cid||''}}
@@ -267,7 +304,7 @@ tx='editou "'+t+'"'+(ch.length?' ('+ch.join(', ')+')':'')+(mv?' e moveu para '+c
 closeM();saveCard(c,log(tab,tx,c.id))})};
 $('#dl').onclick=function(){var c=S.cards[editId];if(!c||!confirm('Excluir o card "'+c.title+'"?'))return;need(function(){closeM();delCard(c.id,log(c.b,'excluiu o card "'+c.title+'"',c.id))})};
 $('#nf').onsubmit=function(e){e.preventDefault();var i=e.target.elements.n,n=i.value.trim();i.classList.toggle('err',!n);if(!n)return;user=n;localStorage.setItem('owlname',n);chip();var p=pend;closeM();if(p)p()};
-$('#who').onclick=function(){$('#nf').elements.n.value=user;pend=null;openM('#mn');$('#nf').elements.n.focus()};
+$('#who').onclick=function(){if(cloud)return;$('#nf').elements.n.value=user;pend=null;openM('#mn');$('#nf').elements.n.focus()};
 $$('[data-x]').forEach(function(b){b.onclick=closeM});
 $$('.md').forEach(function(m){m.addEventListener('mousedown',function(e){if(e.target==m)closeM()})});
 addEventListener('keydown',function(e){if(e.key=='Escape')closeM()});
@@ -278,17 +315,28 @@ $('#exp').onclick=function(){var r=[['Título','Contato','Telefone','Valor','Ori
 bl(tab).forEach(function(c){r.push([c.title,c.sub,c.tel,c.val||'',c.orig,c.resp,c.due,cname(c.b,c.col),c.note,c.by,when(c.t)])});
 var csv='\ufeff'+r.map(function(x){return x.map(function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}).join(';')}).join('\r\n'),a=document.createElement('a');
 a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='owl-'+NM[tab].toLowerCase()+'.csv';a.click()};
-$('#out').onclick=function(){localStorage.removeItem('owlrf');sessionStorage.removeItem('owlok');location.reload()};
+$('#out').onclick=function(){localStorage.removeItem('owlrf');localStorage.removeItem('owluid');localStorage.removeItem('owlmail');sessionStorage.removeItem('owlok');location.reload()};
 /* ---- login ---- */
-function enter(){$('#login').hidden=true;$('#app').hidden=false;$('#bn').hidden=cloud;chip();sync(true);load().then(function(d){S=d;ui()}).catch(function(){sync(false);flash('Erro ao carregar os dados.');ui()});setInterval(refresh,5000)}
-$('#lf').onsubmit=function(e){e.preventDefault();var pw=$('#pw').value,er=$('#le');er.textContent='';
-(cloud?login(pw):sha(pw).then(function(h){if(h!=PWH)throw 0})).then(function(){if(!cloud)sessionStorage.setItem('owlok','1');enter()}).catch(function(x){var m=String(x&&x.message||''),s='Senha incorreta.';
-if(cloud){if(/REFERER|REFERRER/.test(m))s='A chave do Firebase está restrita a outros domínios.';else if(/INVALID_LOGIN|INVALID_PASSWORD|EMAIL_NOT_FOUND/.test(m))s='Senha incorreta, ou o usuário não existe no Firebase.';
+function enter(){$('#login').hidden=true;$('#app').hidden=false;$('#bn').hidden=cloud;$('#nav [data-b=eq]').hidden=!(cloud&&ME.role=='admin');chip();sync(true);load().then(function(d){S=d;ui()}).catch(function(x){sync(false,x);flash('Erro ao carregar: '+diag(x));ui()});setInterval(refresh,5000)}
+function lerr(x){var m=String(x&&x.message||''),s='E-mail ou senha incorretos.';
+if(/REFERER|REFERRER/.test(m))s='A chave do Firebase está restrita a outros domínios.';
+else if(/INVALID_LOGIN|INVALID_PASSWORD|EMAIL_NOT_FOUND|INVALID_EMAIL/.test(m))s='E-mail ou senha incorretos.';
+else if(/NAOLIBERADO/.test(m))s='Seu acesso ainda não foi liberado. Fale com o administrador.';
+else if(/INATIVO/.test(m))s='Seu acesso está desativado. Fale com o administrador.';
 else if(/OPERATION_NOT_ALLOWED|PASSWORD_LOGIN_DISABLED/.test(m))s='O login por e-mail/senha não está ativado no Firebase.';
-else if(/API_KEY|API key/i.test(m))s='A apiKey do Firebase está inválida.';else if(/TOO_MANY/.test(m))s='Muitas tentativas. Aguarde alguns minutos.';
-else if(x instanceof TypeError)s='Sem conexão com o Firebase.';else if(m)s='Erro: '+m}
-er.textContent=s;$('#pw').value='';$('#pw').focus()})};
-if(cloud){var rf=localStorage.getItem('owlrf');if(rf){T={rf:rf};tok().then(enter).catch(function(){})}}else if(sessionStorage.getItem('owlok'))enter();
+else if(/API_KEY|API key/i.test(m))s='A apiKey do Firebase está inválida.';
+else if(/TOO_MANY/.test(m))s='Muitas tentativas. Aguarde alguns minutos.';
+else if(x&&x.status)s='Não foi possível carregar seu perfil ('+diag(x)+').';
+else if(x instanceof TypeError)s='Sem conexão com o Firebase.';
+else if(m)s='Erro: '+m;
+return s}
+if(cloud){$('#lp').textContent='Entre com seu e-mail e senha.';$('#em').hidden=false;$('#fg').hidden=false;$('#em').focus()}
+$('#lf').onsubmit=function(e){e.preventDefault();var em=$('#em').value.trim().toLowerCase(),pw=$('#pw').value,er=$('#le');er.style.color='';er.textContent='';
+(cloud?login(em,pw).then(profile):sha(pw).then(function(h){if(h!=PWH)throw 0})).then(function(){if(!cloud)sessionStorage.setItem('owlok','1');enter()}).catch(function(x){er.textContent=cloud?lerr(x):'Senha incorreta.';$('#pw').value='';$('#pw').focus()})};
+$('#fg').onclick=function(){var em=$('#em').value.trim().toLowerCase(),er=$('#le'),ok='Se o e-mail tiver conta, enviamos um link para criar uma nova senha.';
+if(!em){er.style.color='';er.textContent='Digite seu e-mail e clique de novo em "Esqueci minha senha".';return}
+reset(em).then(function(){er.style.color='#bff0c9';er.textContent=ok}).catch(function(x){if(/EMAIL_NOT_FOUND/.test(String(x.message))){er.style.color='#bff0c9';er.textContent=ok}else{er.style.color='';er.textContent='Não foi possível enviar agora.'}})};
+if(cloud){var rf=localStorage.getItem('owlrf'),ud=localStorage.getItem('owluid');if(rf&&ud){T={rf:rf};ME={uid:ud,email:localStorage.getItem('owlmail')};tok().then(profile).then(enter).catch(function(){})}}else if(sessionStorage.getItem('owlok'))enter();
 })();
 </script>
 </body>
