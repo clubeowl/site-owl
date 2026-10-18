@@ -211,7 +211,7 @@ function flash(t){var e=$('#ts');e.textContent=t;e.classList.add('on');setTimeou
 function tok(){if(T.id&&Date.now()<T.exp-60000)return Promise.resolve(T.id);
 return fetch('https://securetoken.googleapis.com/v1/token?key='+FB.apiKey,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=refresh_token&refresh_token='+encodeURIComponent(T.rf)}).then(function(r){return r.json()}).then(function(j){if(!j.id_token)throw 0;T={id:j.id_token,rf:j.refresh_token,exp:Date.now()+j.expires_in*1000};localStorage.setItem('owlrf',T.rf);return T.id})}
 function api(m,p,b){return tok().then(function(t){return fetch(FB.dbUrl.replace(/\/$/,'')+'/'+p+(p.indexOf('?')<0?'?':'&')+'auth='+t,{method:m,body:b?JSON.stringify(b):undefined})}).then(function(r){if(!r.ok)throw 0;return r.json()})}
-function login(pw){return fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key='+FB.apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:FB.email,password:pw,returnSecureToken:true})}).then(function(r){return r.json()}).then(function(j){if(!j.idToken)throw 0;T={id:j.idToken,rf:j.refreshToken,exp:Date.now()+j.expiresIn*1000};localStorage.setItem('owlrf',T.rf)})}
+function login(pw){return fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key='+FB.apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:FB.email,password:pw,returnSecureToken:true})}).then(function(r){return r.json()}).then(function(j){if(!j.idToken)throw new Error(j.error&&j.error.message||'ERRO');T={id:j.idToken,rf:j.refreshToken,exp:Date.now()+j.expiresIn*1000};localStorage.setItem('owlrf',T.rf)})}
 function sha(s){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(b){return [].map.call(new Uint8Array(b),function(x){return ('0'+x.toString(16)).slice(-2)}).join('')})}
 function lget(){try{return JSON.parse(localStorage.getItem('owlcrm'))||{cards:{},log:[]}}catch(e){return {cards:{},log:[]}}}
 function load(){if(!cloud)return Promise.resolve(lget());
@@ -282,7 +282,12 @@ $('#out').onclick=function(){localStorage.removeItem('owlrf');sessionStorage.rem
 /* ---- login ---- */
 function enter(){$('#login').hidden=true;$('#app').hidden=false;$('#bn').hidden=cloud;chip();sync(true);load().then(function(d){S=d;ui()}).catch(function(){sync(false);flash('Erro ao carregar os dados.');ui()});setInterval(refresh,5000)}
 $('#lf').onsubmit=function(e){e.preventDefault();var pw=$('#pw').value,er=$('#le');er.textContent='';
-(cloud?login(pw):sha(pw).then(function(h){if(h!=PWH)throw 0})).then(function(){if(!cloud)sessionStorage.setItem('owlok','1');enter()}).catch(function(){er.textContent='Senha incorreta.';$('#pw').value='';$('#pw').focus()})};
+(cloud?login(pw):sha(pw).then(function(h){if(h!=PWH)throw 0})).then(function(){if(!cloud)sessionStorage.setItem('owlok','1');enter()}).catch(function(x){var m=String(x&&x.message||''),s='Senha incorreta.';
+if(cloud){if(/REFERER|REFERRER/.test(m))s='A chave do Firebase está restrita a outros domínios.';else if(/INVALID_LOGIN|INVALID_PASSWORD|EMAIL_NOT_FOUND/.test(m))s='Senha incorreta, ou o usuário não existe no Firebase.';
+else if(/OPERATION_NOT_ALLOWED|PASSWORD_LOGIN_DISABLED/.test(m))s='O login por e-mail/senha não está ativado no Firebase.';
+else if(/API_KEY|API key/i.test(m))s='A apiKey do Firebase está inválida.';else if(/TOO_MANY/.test(m))s='Muitas tentativas. Aguarde alguns minutos.';
+else if(x instanceof TypeError)s='Sem conexão com o Firebase.';else if(m)s='Erro: '+m}
+er.textContent=s;$('#pw').value='';$('#pw').focus()})};
 if(cloud){var rf=localStorage.getItem('owlrf');if(rf){T={rf:rf};tok().then(enter).catch(function(){})}}else if(sessionStorage.getItem('owlok'))enter();
 })();
 </script>
