@@ -249,7 +249,8 @@ Concluído</textarea></label>
 (function(){
 /* ====== CONFIGURAÇÃO ====== */
 var FB={apiKey:'AIzaSyAKt9bzn2tyCfIkllZ6l4I_VB_M4ky5fIU',dbUrl:'https://owl-crm-2026-default-rtdb.firebaseio.com'};
-var CLD={cloud:'',preset:''}; /* Cloudinary (anexos): nome da conta e preset sem assinatura */
+var DRIVE={url:''}; /* Anexos no Google Drive: endereço do Apps Script (veja as instruções) */
+var CLD={cloud:'',preset:''}; /* Alternativa: Cloudinary (nome da conta e preset sem assinatura) */
 /* ========================== */
 var PWH='cddfd50ad7427f879fa055ad6d158b6b8d579bce939d5f68aa039210a8f632b1',cloud=!!(FB.apiKey&&FB.dbUrl);
 var $=function(s,r){return (r||document).querySelector(s)},$$=function(s,r){return [].slice.call((r||document).querySelectorAll(s))};
@@ -341,11 +342,16 @@ function uid(){return 'c'+Date.now().toString(36)+Math.random().toString(36).sli
 function sz(n){return n>1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB'}
 function thumb(u){return u.replace('/upload/','/upload/w_120,h_120,c_fill,q_auto/')}
 function dlu(u){return u.replace('/upload/','/upload/fl_attachment/')}
-function renderFiles(){$('#fl').innerHTML=curFiles.map(function(f,i){var im=/\.(png|jpe?g|webp|gif)$/i.test(f.name);return '<div class="fi">'+(im?'<img src="'+esc(thumb(f.url))+'" alt="">':'<span class="ft">'+esc((f.name.split('.').pop()||'').slice(0,4).toUpperCase())+'</span>')+'<div><b>'+esc(f.name)+'</b><small>'+sz(f.size||0)+' · '+esc(f.by||'')+'</small></div><a href="'+esc(dlu(f.url))+'" target="_blank" rel="noopener">Baixar original</a><button type="button" data-i="'+i+'" aria-label="Remover anexo">×</button></div>'}).join('')}
-function upl(file){if(file.size>10485760)return Promise.reject(new Error('BIG'));var fd=new FormData();fd.append('file',file);fd.append('upload_preset',CLD.preset);
+function renderFiles(){$('#fl').innerHTML=curFiles.map(function(f,i){var im=f.rt!='drive'&&/\.(png|jpe?g|webp|gif)$/i.test(f.name);return '<div class="fi">'+(im?'<img src="'+esc(thumb(f.url))+'" alt="">':'<span class="ft">'+esc((f.name.split('.').pop()||'').slice(0,4).toUpperCase())+'</span>')+'<div><b>'+(f.rt=='drive'?'<a href="'+esc(f.url)+'" target="_blank" rel="noopener">'+esc(f.name)+'</a>':esc(f.name))+'</b><small>'+sz(f.size||0)+' · '+esc(f.by||'')+'</small></div><a href="'+esc(f.dl||dlu(f.url))+'" target="_blank" rel="noopener">Baixar original</a><button type="button" data-i="'+i+'" aria-label="Remover anexo">×</button></div>'}).join('')}
+function fb64(file){return new Promise(function(ok,no){var r=new FileReader();r.onload=function(){ok(String(r.result).split(',')[1])};r.onerror=no;r.readAsDataURL(file)})}
+function updrive(file){if(file.size>41943040)return Promise.reject(new Error('BIG'));
+return Promise.all([tok(),fb64(file)]).then(function(a){return fetch(DRIVE.url,{method:'POST',body:JSON.stringify({token:a[0],name:file.name,mime:file.type,data:a[1]})})}).then(function(r){return r.json()}).then(function(j){if(!j.ok)throw new Error(j.error||'ERRO');return {name:file.name,url:j.url,dl:'https://drive.google.com/uc?export=download&id='+j.id,size:j.size||file.size,rt:'drive',by:user,t:Date.now()}})}
+function hasUp(){return !!((DRIVE.url&&cloud)||(CLD.cloud&&CLD.preset))}
+function upl(file){return DRIVE.url&&cloud?updrive(file):uplc(file)}
+function uplc(file){if(file.size>10485760)return Promise.reject(new Error('BIG'));var fd=new FormData();fd.append('file',file);fd.append('upload_preset',CLD.preset);
 return fetch('https://api.cloudinary.com/v1_1/'+CLD.cloud+'/auto/upload',{method:'POST',body:fd}).then(function(r){return r.json()}).then(function(j){if(j.error)throw new Error(j.error.message);return {name:file.name,url:j.secure_url,size:j.bytes||file.size,rt:j.resource_type,by:user,t:Date.now()}})}
-function addFiles(list){var s=$('#fs');if(!CLD.cloud||!CLD.preset){s.textContent='Os anexos ainda não foram configurados (Cloudinary). Veja as instruções.';return}
-list.reduce(function(p,f){return p.then(function(){s.textContent='Enviando '+f.name+'...';return upl(f).then(function(x){curFiles.push(x);renderFiles();s.textContent=''}).catch(function(e){s.textContent=String(e.message)=='BIG'?f.name+' passa de 10 MB (limite do plano gratuito).':'Falha ao enviar '+f.name+': '+e.message})})},Promise.resolve())}
+function addFiles(list){var s=$('#fs');if(!hasUp()){s.textContent='Os anexos ainda não foram configurados. Veja as instruções.';return}
+list.reduce(function(p,f){return p.then(function(){s.textContent='Enviando '+f.name+'...';return upl(f).then(function(x){curFiles.push(x);renderFiles();s.textContent=''}).catch(function(e){s.textContent=String(e.message)=='BIG'?f.name+' passa do limite de tamanho ('+(DRIVE.url?'40':'10')+' MB).':'Falha ao enviar '+f.name+': '+e.message})})},Promise.resolve())}
 $('#fi').onchange=function(){var l=[].slice.call(this.files);this.value='';need(function(){addFiles(l)})};
 $('#fl').addEventListener('click',function(e){var b=e.target.closest('button');if(b){curFiles.splice(+b.dataset.i,1);renderFiles()}});
 function openCard(id,col){editId=id;var f=$('#cf').elements,c=id&&S.cards[id],L=lab(tab);
