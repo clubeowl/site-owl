@@ -170,6 +170,14 @@ button{cursor:pointer}
 .md .fup:hover{background:var(--bg)}
 #fs{color:var(--mu);display:block;margin-top:4px}
 .ipv{margin:10px 0 0;color:var(--mu);font-size:.85rem}
+.na .cd,#kp.na .k{animation:none}
+.cd .ajc{margin:6px 0 0;padding:6px 8px;background:#fde3e1;color:var(--rd);border-radius:8px;font-size:.78rem;font-weight:600}
+.ajh{border-left:3px solid var(--rd);padding:4px 10px;margin-top:6px;font-size:.82rem}
+.ajh p{margin:2px 0 0;color:var(--tx)}
+.fo{display:inline-block;margin-top:4px;font-weight:700;color:var(--n);font-size:.82rem}
+.hint{margin:0;color:var(--mu);font-size:.85rem}
+.row2{display:flex;gap:10px}
+#cfgv{padding:4px 24px 24px;overflow:auto;flex:1}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -198,6 +206,11 @@ button{cursor:pointer}
 <header class="tb"><div><h1 id="ttl"></h1><p id="sbt"></p></div>
 <div class="tr"><div class="sr"><input id="q" type="search" placeholder="Buscar cards..." aria-label="Buscar"></div><button class="btn d" id="delb" hidden>Excluir quadro</button><button class="btn o" id="imp">Importar planilha</button><button class="btn o" id="exp">Exportar CSV</button><button class="btn" id="new">+ Novo card</button></div></header>
 <section id="team" hidden><div class="tw"><form id="uf" class="uf" novalidate><h3>Novo usuário</h3><label>Nome<input name="n" autocomplete="off"></label><label>E-mail<input name="e" type="email" autocomplete="off"></label><label>Senha temporária<input name="p" type="text" autocomplete="off" placeholder="mínimo 6 caracteres"></label><label>Perfil<select name="ro"><option value="member">Membro</option><option value="admin">Administrador</option></select></label><button class="btn" type="submit">Criar usuário</button><div class="er2" id="ue" role="alert"></div></form><div id="tm"></div></div></section>
+<section id="cfgv" hidden><div class="tw" style="grid-template-columns:minmax(0,600px)"><form id="cff" class="uf" novalidate><h3>Anexos no Google Drive</h3><p class="hint">Os arquivos da aba Design são enviados para a sua pasta no Drive e organizados automaticamente em subpastas.</p>
+<label>Endereço do Apps Script<input name="u" autocomplete="off" placeholder="https://script.google.com/macros/s/.../exec"></label>
+<label>Nome da subpasta dos anexos de Design<input name="r" autocomplete="off" placeholder="Design"></label>
+<label>Organização das subpastas<select name="m"><option value="cd">Cliente / Demanda</option><option value="c">Só por cliente</option><option value="d">Só por demanda</option><option value="n">Sem subpastas</option></select></label>
+<div class="row2"><button class="btn" type="submit">Salvar</button><button class="btn o" type="button" id="cft">Testar conexão</button></div><div class="er2" id="cfm" role="status"></div></form></div></section>
 <div class="kp" id="kp"></div>
 <div class="bw"><main id="bd"></main>
 </div>
@@ -220,9 +233,11 @@ button{cursor:pointer}
 <label class="w"><span id="l_note">Observações</span><textarea name="note"></textarea></label>
 <label class="w" data-f="refs"><span>Referências (links)</span><input name="refs" autocomplete="off" placeholder="Inspirações, pasta no Drive, etc."></label>
 <div class="w" data-f="files"><span class="flb">Arquivos da demanda</span><div id="fl"></div><label class="fup"><input type="file" id="fi" multiple hidden>+ Anexar arquivos</label><small id="fs"></small></div>
+<label class="w" id="adjw" hidden><span>Comentário do ajuste: o que precisa ser corrigido?</span><textarea name="adjc" placeholder="Descreva o que precisa mudar nesta revisão"></textarea></label>
+<div class="w" data-f="adj" id="adjh"></div>
 </div>
 <div id="hist" hidden><h5>Histórico do card</h5><ul id="hl"></ul></div>
-<div class="act"><button type="button" class="btn d" id="dl">Excluir</button><button type="button" class="btn o" data-x>Cancelar</button><button class="btn" type="submit">Salvar</button></div>
+<div class="act"><button type="button" class="btn d" id="dl">Excluir</button><button type="button" class="btn o" id="reqadj" hidden>Pedir ajuste</button><button type="button" class="btn o" data-x>Cancelar</button><button class="btn" type="submit">Salvar</button></div>
 </form></div>
 <div class="md" id="mn"><form id="nf" novalidate style="width:min(100%,420px)">
 <h3>Quem está mexendo?</h3><p style="margin:0;color:var(--mu)">Seu nome fica registrado no histórico do card a cada alteração.</p>
@@ -243,6 +258,7 @@ Concluído</textarea></label>
 <div id="imap" hidden><div class="g" id="mapg"></div><label style="margin-top:12px">Etapa padrão (para linhas sem etapa)<select id="idef"></select></label><p id="ipv" class="ipv"></p></div>
 <div class="act"><button type="button" class="btn o" data-x>Cancelar</button><button class="btn" id="igo" type="submit" disabled>Importar</button></div>
 </form></div>
+<div class="md" id="mj"><form id="jf" novalidate style="width:min(100%,520px)"><h3 id="mjt">Pedir ajuste</h3><p style="margin:0;color:var(--mu)">Descreva o que precisa ser corrigido nesta revisão. O comentário fica salvo no histórico do card.</p><label>Comentário do ajuste<textarea name="t" style="min-height:130px" placeholder="Ex.: trocar a cor do título, aumentar o logo..."></textarea></label><div class="act"><button type="button" class="btn o" data-x>Cancelar</button><button class="btn" type="submit">Enviar para ajustes</button></div></form></div>
 <div class="ts" id="ts" role="status"></div>
 
 <script>
@@ -259,12 +275,12 @@ var COLS={com:[['novo','Novo lead','#244669'],['contato','Contato feito','#4f7ca
 cri:[['briefing','Briefing','#244669'],['copy','Roteiro e copy','#4f7cac'],['criacao','Em criação','#c9a400'],['revisao','Revisão','#d9822b'],['aprovado','Aprovado','#2e9e6b'],['publicado','Publicado','#5b4fa8']],
 design:[['sol','Solicitado','#244669'],['cria','Em criação','#c9a400'],['rev','Em revisão','#d9822b'],['aj','Ajustes','#b3261e'],['apr','Aprovado','#2e9e6b'],['ent','Entregue','#5b4fa8']],
 cli:[['ativo','Ativos','#2e9e6b'],['inad','Inadimplentes','#d9822b'],['enc','Encerrados','#8a94a3']]};
-var NM={com:'Comercial',cri:'Criativo',design:'Design',cli:'Clientes',eq:'Equipe'},SB={com:'Funil de vendas',cri:'Fluxo de criação de conteúdo',design:'Demandas de arte e design',cli:'Carteira de clientes',eq:'Usuários com acesso ao painel'};
+var NM={com:'Comercial',cri:'Criativo',design:'Design',cli:'Clientes',eq:'Equipe',cfg:'Configurações'},SB={com:'Funil de vendas',cri:'Fluxo de criação de conteúdo',design:'Demandas de arte e design',cli:'Carteira de clientes',eq:'Usuários com acesso ao painel',cfg:'Integrações e organização'};
 var LBL={com:{title:'Empresa ou lead',sub:'Nome do contato',val:'Valor da proposta (R$)',resp:'Responsável',due:'Próximo contato'},cri:{title:'Conteúdo ou peça',sub:'Cliente',resp:'Responsável',due:'Prazo de entrega'},cli:{title:'Cliente',sub:'Nome do contato',val:'Mensalidade (R$)',resp:'Gestor da conta',due:'Próximo vencimento'},design:{title:'Título da demanda',sub:'Cliente',resp:'Quem vai fazer',due:'Prazo de entrega',note:'Brief detalhado'}};
 var GEN={title:'Título',sub:'Contato',val:'Valor (R$)',resp:'Responsável',due:'Prazo',note:'Observações'};
-var SHOW={com:['tel','val','orig'],cri:[],cli:['tel','val'],design:['art','fmt','refs','files']},DONE={com:['fechado','perdido'],cri:['aprovado','publicado'],cli:['enc'],design:['apr','ent']};
+var SHOW={com:['tel','val','orig'],cri:[],cli:['tel','val'],design:['art','fmt','refs','files','adj']},DONE={com:['fechado','perdido'],cri:['aprovado','publicado'],cli:['enc'],design:['apr','ent']};
 var FN={title:'nome',sub:'contato',tel:'telefone',val:'valor',resp:'responsável',orig:'origem',due:'prazo',note:'observações',art:'tipo de arte',fmt:'formato',refs:'referências'};
-var S={cards:{},log:[],boards:{}},tab='com',ME={},user=cloud?'':(localStorage.getItem('owlname')||''),drag=null,pend=null,editId=null,quiet=0,T={},q='',curFiles=[],IM={},CUST=[],dx=null,raf=0;
+var S={cards:{},log:[],boards:{},config:{}},tab='com',ME={},user=cloud?'':(localStorage.getItem('owlname')||''),drag=null,pend=null,editId=null,quiet=0,T={},q='',curFiles=[],IM={},CUST=[],dx=null,raf=0,lastSig='',lastTab='',adjId=null;
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function money(v){return Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0})}
 function when(t){return new Date(t).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}
@@ -275,11 +291,12 @@ function lab(b){return Object.assign({},GEN,LBL[b]||{})}
 function cname(b,c){var r=(COLS[b]||[]).filter(function(x){return x[0]==c})[0];return r?r[1]:c}
 function bl(b){return Object.keys(S.cards).map(function(k){return S.cards[k]}).filter(function(c){return c.b==b})}
 function fls(c){var f=c&&c.files;return !f?[]:Array.isArray(f)?f.slice():Object.keys(f).map(function(k){return f[k]})}
+function adjs(c){var a=c&&c.adj;return !a?[]:Array.isArray(a)?a.slice():Object.keys(a).map(function(k){return a[k]})}
 function flash(t){var e=$('#ts');e.textContent=t;e.classList.add('on');setTimeout(function(){e.classList.remove('on')},3400)}
 var CUST_KEYS=['COLS','NM','SB','LBL','SHOW','DONE'];
 function applyBoards(){CUST.forEach(function(id){delete COLS[id];delete NM[id];delete SB[id];delete LBL[id];delete SHOW[id];delete DONE[id]});CUST=[];
 Object.keys(S.boards||{}).sort(function(a,b){return (S.boards[a].c||0)-(S.boards[b].c||0)}).forEach(function(id){var b=S.boards[id],cs=(b.cols||[]).map(function(c){return [c.id,c.name,c.color]});if(!cs.length)return;COLS[id]=cs;NM[id]=b.name;SB[id]='Quadro personalizado';LBL[id]=GEN;SHOW[id]=['tel','val'];DONE[id]=[cs[cs.length-1][0]];CUST.push(id)})}
-function setS(d){S=d;if(!S.boards)S.boards={};applyBoards()}
+function setS(d){S=d;if(!S.boards)S.boards={};if(!S.config)S.config={};applyBoards()}
 /* ---- backend ---- */
 function tok(){if(T.id&&Date.now()<T.exp-60000)return Promise.resolve(T.id);
 return fetch('https://securetoken.googleapis.com/v1/token?key='+FB.apiKey,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=refresh_token&refresh_token='+encodeURIComponent(T.rf)}).then(function(r){return r.json()}).then(function(j){if(!j.id_token)throw 0;T={id:j.id_token,rf:j.refresh_token,exp:Date.now()+j.expires_in*1000};localStorage.setItem('owlrf',T.rf);return T.id})}
@@ -290,37 +307,37 @@ function profile(){return api('GET','users/'+ME.uid).then(function(p){if(p)retur
 function sha(s){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(b){return [].map.call(new Uint8Array(b),function(x){return ('0'+x.toString(16)).slice(-2)}).join('')})}
 function lget(){try{return JSON.parse(localStorage.getItem('owlcrm'))||{cards:{},log:[],boards:{}}}catch(e){return {cards:{},log:[],boards:{}}}}
 function load(){if(!cloud)return Promise.resolve(lget());
-return Promise.all([api('GET','cards'),api('GET','log?orderBy=%22%24key%22&limitToLast=300'),api('GET','boards')]).then(function(r){return {cards:r[0]||{},log:Object.keys(r[1]||{}).map(function(k){return r[1][k]}),boards:r[2]||{}}})}
+return Promise.all([api('GET','cards'),api('GET','log?orderBy=%22%24key%22&limitToLast=300'),api('GET','boards'),api('GET','config').catch(function(){return null})]).then(function(r){return {cards:r[0]||{},log:Object.keys(r[1]||{}).map(function(k){return r[1][k]}),boards:r[2]||{},config:r[3]||{}}})}
 function ls(){localStorage.setItem('owlcrm',JSON.stringify(S))}
 function bad(x){flash('Não foi possível salvar: '+diag(x))}
 function diag(x){var s=x&&x.status;return s==401||s==403?'sem permissão, confira as regras do banco':s==404?'endereço do banco incorreto':s?'erro '+s:'sem acesso ao banco (internet ou bloqueio)'}
 function sync(ok,x){var s=$('#sync');s.className='sy '+(cloud?(ok?'ok':'er'):'');$('span',s).textContent=cloud?(ok?'Sincronizado':'Sem conexão: '+diag(x)):'Modo local'}
 function saveCard(c,e){S.cards[c.id]=c;S.log.push(e);quiet=Date.now()+4000;ui();if(cloud){api('PUT','cards/'+c.id,c).catch(bad);api('POST','log',e).catch(bad)}else ls()}
 function delCard(id,e){delete S.cards[id];S.log.push(e);quiet=Date.now()+4000;ui();if(cloud){api('DELETE','cards/'+id).catch(bad);api('POST','log',e).catch(bad)}else ls()}
-function refresh(){if(tab=='eq'||drag||$('.md.on')||Date.now()<quiet)return;load().then(function(d){setS(d);ui();sync(true)}).catch(function(x){sync(false,x)})}
+function refresh(){if(tab=='eq'||tab=='cfg'||drag||$('.md.on')||Date.now()<quiet)return;load().then(function(d){var s=JSON.stringify([d.cards,d.boards,d.config]);if(s!==lastSig){lastSig=s;setS(d);ui()}sync(true)}).catch(function(x){sync(false,x)})}
 /* ---- render ---- */
 function dlab(b){return b=='com'?'Contato ':b=='cli'?'Venc. ':'Prazo '}
 function match(c){return !q||[c.title,c.sub,c.resp,c.tel,c.note,c.art].join(' ').toLowerCase().indexOf(q)>=0}
 function cardH(c,col){var od=c.due&&c.due<today()&&DONE[c.b].indexOf(c.col)<0,rs=c.resp||'Sem responsável',nf=fls(c).length,tg=c.orig||c.art||'';
-return '<article class="cd" draggable="true" data-id="'+c.id+'" style="--c:'+col+'"><div class="r1"><h4>'+esc(c.title)+'</h4>'+(tg?'<em class="tag">'+esc(tg)+'</em>':'')+'</div>'+(c.sub?'<p>'+esc(c.sub)+'</p>':'')
+return '<article class="cd" draggable="true" data-id="'+c.id+'" style="--c:'+col+'"><div class="r1"><h4>'+esc(c.title)+'</h4>'+(tg?'<em class="tag">'+esc(tg)+'</em>':'')+'</div>'+(c.sub?'<p>'+esc(c.sub)+'</p>':'')+(c.col=='aj'&&adjs(c).length?'<p class="ajc">Ajuste #'+adjs(c).length+': '+esc(String(adjs(c).slice(-1)[0].text).slice(0,70))+'</p>':'')
 +((c.val||c.due||nf)?'<div class="mt">'+(c.val?'<span class="vl">'+money(c.val)+'</span>':'')+(c.due?'<span class="'+(od?'od':'')+'">'+dlab(c.b)+dsh(c.due)+'</span>':'')+(nf?'<span>'+nf+' anexo'+(nf>1?'s':'')+'</span>':'')+'</div>':'')
 +'<footer><span class="av s">'+esc(rs.charAt(0).toUpperCase())+'</span><span class="rn">'+esc(rs)+'</span>'+(c.tel?'<a class="wa" href="https://wa.me/'+wnum(c.tel)+'" target="_blank" rel="noopener">WhatsApp</a>':'')+'</footer></article>'}
-function board(){var list=bl(tab).filter(match),hv=SHOW[tab].indexOf('val')>=0;
-$('#bd').innerHTML=COLS[tab].map(function(cl){var it=list.filter(function(c){return c.col==cl[0]}).sort(function(a,b){return b.t-a.t}),sum=hv?it.reduce(function(s,c){return s+(c.val||0)},0):0;
-return '<section class="col" data-c="'+cl[0]+'"><header><i style="background:'+cl[2]+'"></i><b>'+esc(cl[1])+'</b><em>'+it.length+'</em>'+(sum?'<span>'+money(sum)+'</span>':'')+'<button class="add" data-c="'+cl[0]+'" aria-label="Novo card em '+esc(cl[1])+'">+</button></header><div class="cl">'+(it.length?it.map(function(c){return cardH(c,cl[2])}).join(''):'<div class="emp">Nenhum card</div>')+'</div></section>'}).join('')}
+function board(){var bd=$('#bd'),same=lastTab==tab,sl=bd.scrollLeft,st=same?$$('.cl',bd).map(function(e){return e.scrollTop}):[],list=bl(tab).filter(match),hv=SHOW[tab].indexOf('val')>=0;
+bd.innerHTML=COLS[tab].map(function(cl){var it=list.filter(function(c){return c.col==cl[0]}).sort(function(a,b){return b.t-a.t}),sum=hv?it.reduce(function(s,c){return s+(c.val||0)},0):0;
+return '<section class="col" data-c="'+cl[0]+'"><header><i style="background:'+cl[2]+'"></i><b>'+esc(cl[1])+'</b><em>'+it.length+'</em>'+(sum?'<span>'+money(sum)+'</span>':'')+'<button class="add" data-c="'+cl[0]+'" aria-label="Novo card em '+esc(cl[1])+'">+</button></header><div class="cl">'+(it.length?it.map(function(c){return cardH(c,cl[2])}).join(''):'<div class="emp">Nenhum card</div>')+'</div></section>'}).join('');bd.classList.toggle('na',same);if(same){bd.scrollLeft=sl;$$('.cl',bd).forEach(function(e,i){e.scrollTop=st[i]||0})}else bd.scrollLeft=0;lastTab=tab}
 function kpi(){var l=bl(tab),n=function(a){return l.filter(function(c){return a.indexOf(c.col)>=0})},sm=function(a){return a.reduce(function(s,c){return s+(c.val||0)},0)},t=today(),at=l.filter(function(c){return c.due&&c.due<t&&DONE[tab].indexOf(c.col)<0}),k;
 if(tab=='com'){var o=n(['novo','contato','proposta','neg']),f=n(['fechado']),p=n(['perdido']);k=[['Leads em aberto',o.length,'no funil'],['Valor em negociação',money(sm(o)),'propostas abertas'],['Fechado',money(sm(f)),f.length+' negócio(s)'],['Conversão',f.length+p.length?Math.round(f.length/(f.length+p.length)*100)+'%':'—','fechados ÷ (fechados + perdidos)']]}
 else if(tab=='cri')k=[['Em produção',n(['briefing','copy','criacao']).length,'briefing, copy e criação'],['Em revisão',n(['revisao']).length,'aguardando ajustes'],['Atrasados',at.length,'prazo vencido'],['Publicados',n(['publicado']).length,'entregues']];
 else if(tab=='cli'){var a=n(['ativo']),i=n(['inad']);k=[['Clientes ativos',a.length,'na carteira'],['Receita mensal',money(sm(a)),'soma das mensalidades'],['Inadimplentes',i.length,money(sm(i))+' em atraso'],['Encerrados',n(['enc']).length,'contratos finalizados']]}
 else if(tab=='design')k=[['Demandas abertas',l.length-n(DONE.design).length,'em andamento'],['Em criação',n(['cria']).length,'sendo produzidas'],['Revisão e ajustes',n(['rev','aj']).length,'aguardando retorno'],['Atrasadas',at.length,'prazo vencido']];
 else k=[['Total de cards',l.length,'neste quadro'],['Valor total',money(sm(l)),'soma dos valores'],['Concluídos',n(DONE[tab]).length,'na última etapa'],['Atrasados',at.length,'prazo vencido']];
-$('#kp').innerHTML=k.map(function(x){return '<div class="k"><small>'+x[0]+'</small><b>'+x[1]+'</b><span>'+x[2]+'</span></div>'}).join('')}
-var IC={com:'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',cri:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',design:'<circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1.2"/><circle cx="12" cy="7.5" r="1.2"/><circle cx="15.5" cy="10" r="1.2"/><path d="M12 21a2.5 2.5 0 0 1 0-5h2"/>',cli:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.5 3.3-5.5 6.5-5.5s5.9 2 6.5 5.5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.5c2.5.2 4 1.8 4.5 4.5"/>',box:'<rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="10" rx="1.5"/><rect x="17" y="4" width="4" height="13" rx="1.5"/>',plus:'<path d="M12 5v14M5 12h14"/>',eq:'<circle cx="12" cy="8" r="3.5"/><path d="M5 20c.6-4 3.4-6 7-6s6.4 2 7 6"/>'};
+$('#kp').classList.toggle('na',lastTab==tab);$('#kp').innerHTML=k.map(function(x){return '<div class="k"><small>'+x[0]+'</small><b>'+x[1]+'</b><span>'+x[2]+'</span></div>'}).join('')}
+var IC={com:'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',cri:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',design:'<circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1.2"/><circle cx="12" cy="7.5" r="1.2"/><circle cx="15.5" cy="10" r="1.2"/><path d="M12 21a2.5 2.5 0 0 1 0-5h2"/>',cli:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.5 3.3-5.5 6.5-5.5s5.9 2 6.5 5.5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.5c2.5.2 4 1.8 4.5 4.5"/>',box:'<rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="10" rx="1.5"/><rect x="17" y="4" width="4" height="13" rx="1.5"/>',plus:'<path d="M12 5v14M5 12h14"/>',cfg:'<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',eq:'<circle cx="12" cy="8" r="3.5"/><path d="M5 20c.6-4 3.4-6 7-6s6.4 2 7 6"/>'};
 function navH(){var it=[['com'],['cri'],['design',1],['cli']].concat(CUST.map(function(id){return [id]})),
-b=function(id,sub){return '<button data-b="'+id+'" class="'+(id==tab?'on':'')+(sub?' sub':'')+'" title="'+esc(NM[id])+'"><svg viewBox="0 0 24 24">'+(IC[id]||IC.box)+'</svg><span class="tx">'+esc(NM[id])+'</span><em class="tx">'+(id=='eq'?'':bl(id).length)+'</em></button>'};
-return it.map(function(x){return b(x[0],x[1])}).join('')+'<button data-a="nb" title="Novo quadro"><svg viewBox="0 0 24 24">'+IC.plus+'</svg><span class="tx">Novo quadro</span></button>'+(cloud&&ME.role=='admin'?b('eq'):'')}
-function ui(){if(!NM[tab])tab='com';var eq=tab=='eq';$('#ttl').textContent=NM[tab];$('#sbt').textContent=SB[tab];$('#nav').innerHTML=navH();
-['#kp','.bw','.sr','#exp','#new','#imp'].forEach(function(s){$(s).hidden=eq});$('#delb').hidden=CUST.indexOf(tab)<0;$('#team').hidden=!eq;if(eq)return team();kpi();board()}
+b=function(id,sub){return '<button data-b="'+id+'" class="'+(id==tab?'on':'')+(sub?' sub':'')+'" title="'+esc(NM[id])+'"><svg viewBox="0 0 24 24">'+(IC[id]||IC.box)+'</svg><span class="tx">'+esc(NM[id])+'</span><em class="tx">'+(id=='eq'||id=='cfg'?'':bl(id).length)+'</em></button>'};
+return it.map(function(x){return b(x[0],x[1])}).join('')+'<button data-a="nb" title="Novo quadro"><svg viewBox="0 0 24 24">'+IC.plus+'</svg><span class="tx">Novo quadro</span></button>'+(cloud&&ME.role=='admin'?b('cfg')+b('eq'):'')}
+function ui(){if(!NM[tab])tab='com';var eq=tab=='eq'||tab=='cfg';$('#ttl').textContent=NM[tab];$('#sbt').textContent=SB[tab];$('#nav').innerHTML=navH();
+['#kp','.bw','.sr','#exp','#new','#imp'].forEach(function(s){$(s).hidden=eq});$('#delb').hidden=CUST.indexOf(tab)<0;$('#team').hidden=tab!='eq';$('#cfgv').hidden=tab!='cfg';if(tab=='cfg')return cfgRender();if(tab=='eq')return team();kpi();board()}
 function team(){var box=$('#tm');box.innerHTML='<div class="emp">Carregando...</div>';
 api('GET','users').then(function(u){u=u||{};var l=Object.keys(u).map(function(k){var x=u[k];x.id=k;return x}).sort(function(a,b){return String(a.name).localeCompare(String(b.name))});
 box.innerHTML='<table class="tt"><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th></th></tr></thead><tbody>'+l.map(function(x){var me=x.id==ME.uid,off=x.active===false;return '<tr><td><b>'+esc(x.name)+'</b>'+(me?' <em class="tg">você</em>':'')+'</td><td>'+esc(x.email)+'</td><td>'+(x.role=='admin'?'Administrador':'Membro')+'</td><td><span class="st '+(off?'of':'on')+'">'+(off?'Desativado':'Ativo')+'</span></td><td class="ac">'+(me?'':'<button data-a="tg" data-id="'+x.id+'" data-v="'+(off?1:0)+'" data-n="'+esc(x.name)+'">'+(off?'Reativar':'Desativar')+'</button>')+'<button data-a="rs" data-m="'+esc(x.email)+'">Redefinir senha</button></td></tr>'}).join('')+'</tbody></table>'}).catch(function(x){box.innerHTML='<div class="emp">Não foi possível carregar a equipe ('+diag(x)+').</div>'})}
@@ -342,16 +359,19 @@ function uid(){return 'c'+Date.now().toString(36)+Math.random().toString(36).sli
 function sz(n){return n>1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB'}
 function thumb(u){return u.replace('/upload/','/upload/w_120,h_120,c_fill,q_auto/')}
 function dlu(u){return u.replace('/upload/','/upload/fl_attachment/')}
-function renderFiles(){$('#fl').innerHTML=curFiles.map(function(f,i){var im=f.rt!='drive'&&/\.(png|jpe?g|webp|gif)$/i.test(f.name);return '<div class="fi">'+(im?'<img src="'+esc(thumb(f.url))+'" alt="">':'<span class="ft">'+esc((f.name.split('.').pop()||'').slice(0,4).toUpperCase())+'</span>')+'<div><b>'+(f.rt=='drive'?'<a href="'+esc(f.url)+'" target="_blank" rel="noopener">'+esc(f.name)+'</a>':esc(f.name))+'</b><small>'+sz(f.size||0)+' · '+esc(f.by||'')+'</small></div><a href="'+esc(f.dl||dlu(f.url))+'" target="_blank" rel="noopener">Baixar original</a><button type="button" data-i="'+i+'" aria-label="Remover anexo">×</button></div>'}).join('')}
+function renderFiles(){$('#fl').innerHTML=curFiles.map(function(f,i){var im=f.rt!='drive'&&/\.(png|jpe?g|webp|gif)$/i.test(f.name);return '<div class="fi">'+(im?'<img src="'+esc(thumb(f.url))+'" alt="">':'<span class="ft">'+esc((f.name.split('.').pop()||'').slice(0,4).toUpperCase())+'</span>')+'<div><b>'+(f.rt=='drive'?'<a href="'+esc(f.url)+'" target="_blank" rel="noopener">'+esc(f.name)+'</a>':esc(f.name))+'</b><small>'+sz(f.size||0)+' · '+esc(f.by||'')+'</small></div><a href="'+esc(f.dl||dlu(f.url))+'" target="_blank" rel="noopener">Baixar original</a><button type="button" data-i="'+i+'" aria-label="Remover anexo">×</button></div>'}).join('')+(curFiles.some(function(f){return f.fu})?'<a class="fo" href="'+esc(curFiles.filter(function(f){return f.fu}).slice(-1)[0].fu)+'" target="_blank" rel="noopener">Abrir a pasta desta demanda no Drive</a>':'')}
 function fb64(file){return new Promise(function(ok,no){var r=new FileReader();r.onload=function(){ok(String(r.result).split(',')[1])};r.onerror=no;r.readAsDataURL(file)})}
+function drv(){var c=(S.config&&S.config.drive)||{};return {url:c.url||DRIVE.url,root:c.root||'Design',mode:c.mode||'cd'}}
+function cl(s,d){s=String(s||'').replace(/[\\\/:*?"<>|]/g,'-').trim().slice(0,80);return s||d}
+function drivePath(){var f=$('#cf').elements,d=drv(),p=[cl(d.root,'Design')],c=cl(f.sub.value,'Sem cliente'),t=cl(f.title.value,'Sem título');if(d.mode=='cd')p.push(c,t);else if(d.mode=='c')p.push(c);else if(d.mode=='d')p.push(t);return p}
 function updrive(file){if(file.size>41943040)return Promise.reject(new Error('BIG'));
-return Promise.all([tok(),fb64(file)]).then(function(a){return fetch(DRIVE.url,{method:'POST',body:JSON.stringify({token:a[0],name:file.name,mime:file.type,data:a[1]})})}).then(function(r){return r.json()}).then(function(j){if(!j.ok)throw new Error(j.error||'ERRO');return {name:file.name,url:j.url,dl:'https://drive.google.com/uc?export=download&id='+j.id,size:j.size||file.size,rt:'drive',by:user,t:Date.now()}})}
-function hasUp(){return !!((DRIVE.url&&cloud)||(CLD.cloud&&CLD.preset))}
-function upl(file){return DRIVE.url&&cloud?updrive(file):uplc(file)}
+return Promise.all([tok(),fb64(file)]).then(function(a){return fetch(drv().url,{method:'POST',body:JSON.stringify({token:a[0],name:file.name,mime:file.type,data:a[1],path:drivePath()})})}).then(function(r){return r.json()}).then(function(j){if(!j.ok)throw new Error(j.error||'ERRO');return {name:file.name,url:j.url,dl:'https://drive.google.com/uc?export=download&id='+j.id,fu:j.folderUrl||'',size:j.size||file.size,rt:'drive',by:user,t:Date.now()}})}
+function hasUp(){return !!((drv().url&&cloud)||(CLD.cloud&&CLD.preset))}
+function upl(file){return drv().url&&cloud?updrive(file):uplc(file)}
 function uplc(file){if(file.size>10485760)return Promise.reject(new Error('BIG'));var fd=new FormData();fd.append('file',file);fd.append('upload_preset',CLD.preset);
 return fetch('https://api.cloudinary.com/v1_1/'+CLD.cloud+'/auto/upload',{method:'POST',body:fd}).then(function(r){return r.json()}).then(function(j){if(j.error)throw new Error(j.error.message);return {name:file.name,url:j.secure_url,size:j.bytes||file.size,rt:j.resource_type,by:user,t:Date.now()}})}
 function addFiles(list){var s=$('#fs');if(!hasUp()){s.textContent='Os anexos ainda não foram configurados. Veja as instruções.';return}
-list.reduce(function(p,f){return p.then(function(){s.textContent='Enviando '+f.name+'...';return upl(f).then(function(x){curFiles.push(x);renderFiles();s.textContent=''}).catch(function(e){s.textContent=String(e.message)=='BIG'?f.name+' passa do limite de tamanho ('+(DRIVE.url?'40':'10')+' MB).':'Falha ao enviar '+f.name+': '+e.message})})},Promise.resolve())}
+list.reduce(function(p,f){return p.then(function(){s.textContent='Enviando '+f.name+'...';return upl(f).then(function(x){curFiles.push(x);renderFiles();s.textContent=''}).catch(function(e){s.textContent=String(e.message)=='BIG'?f.name+' passa do limite de tamanho ('+(drv().url?'40':'10')+' MB).':'Falha ao enviar '+f.name+': '+e.message})})},Promise.resolve())}
 $('#fi').onchange=function(){var l=[].slice.call(this.files);this.value='';need(function(){addFiles(l)})};
 $('#fl').addEventListener('click',function(e){var b=e.target.closest('button');if(b){curFiles.splice(+b.dataset.i,1);renderFiles()}});
 function openCard(id,col){editId=id;var f=$('#cf').elements,c=id&&S.cards[id],L=lab(tab);
@@ -361,10 +381,11 @@ $$('#cf [data-f]').forEach(function(l){l.hidden=SHOW[tab].indexOf(l.dataset.f)<0
 f.col.innerHTML=COLS[tab].map(function(x){return '<option value="'+x[0]+'">'+esc(x[1])+'</option>'}).join('');
 ['title','sub','tel','resp','due','note','orig','art','fmt','refs'].forEach(function(k){f[k].value=c?(c[k]||''):''});f.val.value=c&&c.val?c.val:'';f.col.value=c?c.col:col;f.title.classList.remove('err');f.note.style.minHeight=tab=='design'?'150px':'76px';
 curFiles=fls(c);renderFiles();$('#fs').textContent='';
+var aj=adjs(c);$('#adjw').hidden=true;f.adjc.value='';f.adjc.classList.remove('err');$('#reqadj').hidden=!(tab=='design'&&c&&c.col!='aj');$('#adjh').innerHTML=aj.length?'<span class="flb">Histórico de ajustes</span>'+aj.map(function(a){return '<div class="ajh"><b>Ajuste #'+a.n+'</b> · '+esc(a.by)+' · '+when(a.t)+'<p>'+esc(a.text)+'</p></div>'}).join(''):'';
 var h=c?S.log.filter(function(e){return e.cid==id}).sort(function(a,b){return b.ts-a.ts}).slice(0,8):[];
 $('#hist').hidden=!h.length;$('#hl').innerHTML=h.map(function(e){return '<li><b>'+esc(e.user)+'</b> '+esc(e.text)+' <small>'+when(e.ts)+'</small></li>'}).join('');
 $('#dl').hidden=!c;openM('#mc');f.title.focus()}
-function move(id,to){need(function(){var c=S.cards[id];if(!c||c.col==to)return;var fr=cname(c.b,c.col);c=Object.assign({},c,{col:to,t:Date.now(),by:user});saveCard(c,log(c.b,'moveu "'+c.title+'" de '+fr+' para '+cname(c.b,to),c.id))})}
+function move(id,to){need(function(){var c=S.cards[id];if(!c||c.col==to)return;if(c.b=='design'&&to=='aj'){askAdj(id);return}var fr=cname(c.b,c.col);c=Object.assign({},c,{col:to,t:Date.now(),by:user});saveCard(c,log(c.b,'moveu "'+c.title+'" de '+fr+' para '+cname(c.b,to),c.id))})}
 $('#bd').addEventListener('click',function(e){if(e.target.closest('a'))return;var a=e.target.closest('.add'),c=e.target.closest('.cd');if(a)openCard(null,a.dataset.c);else if(c)openCard(c.dataset.id)});
 /* arrastar com rolagem automática nas bordas */
 function loopScroll(){if(!drag){raf=0;return}var b=$('#bd'),r=b.getBoundingClientRect(),z=130,sp=0;
@@ -376,10 +397,12 @@ $('#bd').addEventListener('dragover',function(e){var c=e.target.closest('.col');
 $('#bd').addEventListener('dragend',function(){drag=null;board()});
 $('#bd').addEventListener('drop',function(e){e.preventDefault();var c=e.target.closest('.col');if(!c||!drag)return;var id=drag;drag=null;move(id,c.dataset.c)});
 $('#cf').onsubmit=function(e){e.preventDefault();var f=e.target.elements,t=f.title.value.trim();f.title.classList.toggle('err',!t);if(!t)return;
-need(function(){var old=editId&&S.cards[editId],sh=SHOW[tab],has=function(k){return sh.indexOf(k)>=0},c={id:editId||uid(),b:tab,col:f.col.value,title:t,sub:f.sub.value.trim(),tel:has('tel')?f.tel.value.trim():'',val:has('val')?(parseFloat(f.val.value)||0):0,orig:has('orig')?f.orig.value:'',art:has('art')?f.art.value:'',fmt:has('fmt')?f.fmt.value.trim():'',refs:has('refs')?f.refs.value.trim():'',files:has('files')?curFiles:[],resp:f.resp.value.trim(),due:f.due.value,note:f.note.value.trim(),c:old?old.c:Date.now(),t:Date.now(),by:user},tx;
+need(function(){var old=editId&&S.cards[editId],sh=SHOW[tab],has=function(k){return sh.indexOf(k)>=0},c={id:editId||uid(),b:tab,col:f.col.value,title:t,sub:f.sub.value.trim(),tel:has('tel')?f.tel.value.trim():'',val:has('val')?(parseFloat(f.val.value)||0):0,orig:has('orig')?f.orig.value:'',art:has('art')?f.art.value:'',fmt:has('fmt')?f.fmt.value.trim():'',refs:has('refs')?f.refs.value.trim():'',files:has('files')?curFiles:[],resp:f.resp.value.trim(),due:f.due.value,note:f.note.value.trim(),adj:adjs(old),c:old?old.c:Date.now(),t:Date.now(),by:user},tx,aj=tab=='design'&&c.col=='aj'&&(!old||old.col!='aj'),ac=aj?f.adjc.value.trim():'';
+if(aj&&!ac){f.adjc.classList.add('err');showAdj();flash('Escreva o comentário do ajuste.');return}
+if(aj)c.adj=c.adj.concat([{n:c.adj.length+1,text:ac,by:user,t:Date.now()}]);
 if(old){var ch=Object.keys(FN).filter(function(k){return (old[k]||'')!=(c[k]||'')}).map(function(k){return FN[k]}),mv=old.col!=c.col,nf=fls(old).length,nn=c.files.length;if(nn!=nf)ch.push(nn>nf?'anexou arquivo':'removeu anexo');if(!ch.length&&!mv){closeM();return}
 tx='editou "'+t+'"'+(ch.length?' ('+ch.join(', ')+')':'')+(mv?' e moveu para '+cname(tab,c.col):'')}else tx='criou o card "'+t+'" em '+cname(tab,c.col);
-closeM();saveCard(c,log(tab,tx,c.id))})};
+if(aj)tx+=' e pediu ajuste #'+c.adj.length+': "'+ac+'"';closeM();saveCard(c,log(tab,tx,c.id))})};
 $('#dl').onclick=function(){var c=S.cards[editId];if(!c||!confirm('Excluir o card "'+c.title+'"?'))return;need(function(){closeM();delCard(c.id,log(c.b,'excluiu o card "'+c.title+'"',c.id))})};
 $('#nf').onsubmit=function(e){e.preventDefault();var i=e.target.elements.n,n=i.value.trim();i.classList.toggle('err',!n);if(!n)return;user=n;localStorage.setItem('owlname',n);chip();var p=pend;closeM();if(p)p()};
 $('#who').onclick=function(){if(cloud)return;$('#nf').elements.n.value=user;pend=null;openM('#mn');$('#nf').elements.n.focus()};
@@ -394,6 +417,18 @@ bl(tab).forEach(function(c){r.push([c.title,c.sub,c.tel,c.val||'',c.orig,c.art,c
 var csv='\ufeff'+r.map(function(x){return x.map(function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}).join(';')}).join('\r\n'),a=document.createElement('a');
 a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='owl-'+NM[tab].toLowerCase()+'.csv';a.click()};
 $('#out').onclick=function(){localStorage.removeItem('owlrf');localStorage.removeItem('owluid');localStorage.removeItem('owlmail');sessionStorage.removeItem('owlok');location.reload()};
+function showAdj(){var f=$('#cf').elements,old=editId&&S.cards[editId],on=tab=='design'&&f.col.value=='aj'&&(!old||old.col!='aj');$('#adjw').hidden=!on;if(on)f.adjc.focus()}
+$('#cf').elements.col.onchange=showAdj;
+$('#reqadj').onclick=function(){$('#cf').elements.col.value='aj';showAdj()};
+function askAdj(id){adjId=id;var c=S.cards[id],ta=$('#jf').elements.t;$('#mjt').textContent='Pedir ajuste: '+c.title;ta.value='';ta.classList.remove('err');openM('#mj');ta.focus()}
+$('#jf').onsubmit=function(e){e.preventDefault();var ta=e.target.elements.t,tx=ta.value.trim();ta.classList.toggle('err',!tx);if(!tx)return;var c=S.cards[adjId];if(!c)return;need(function(){var a=adjs(c),n=a.length+1,c2=Object.assign({},c,{col:'aj',adj:a.concat([{n:n,text:tx,by:user,t:Date.now()}]),t:Date.now(),by:user});closeM();saveCard(c2,log(c.b,'pediu ajuste #'+n+' em "'+c.title+'": '+tx,c.id))})};
+/* ---- configurações (Drive) ---- */
+function cfgRender(){var d=drv(),f=$('#cff').elements;f.u.value=d.url||'';f.r.value=d.root;f.m.value=d.mode;$('#cfm').textContent='';$('#cfm').style.color=''}
+$('#cff').onsubmit=function(e){e.preventDefault();var f=e.target.elements,o={url:f.u.value.trim(),root:cl(f.r.value,'Design'),mode:f.m.value,by:ME.name,t:Date.now()},m=$('#cfm');m.style.color='';
+if(o.url&&!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(o.url)){m.textContent='O endereço deve começar com https://script.google.com/macros/s/ e terminar em /exec.';return}
+api('PUT','config/drive',o).then(function(){S.config.drive=o;lastSig='';m.style.color='#1d7a4d';m.textContent='Configurações salvas.'}).catch(function(x){m.textContent='Não foi possível salvar ('+diag(x)+'). Confira se as regras do banco incluem "config".'})};
+$('#cft').onclick=function(){var u=$('#cff').elements.u.value.trim(),m=$('#cfm');m.style.color='';if(!u){m.textContent='Cole o endereço do Apps Script primeiro.';return}m.textContent='Testando...';
+tok().then(function(t){return fetch(u,{method:'POST',body:JSON.stringify({action:'ping',token:t})})}).then(function(r){return r.json()}).then(function(j){if(!j.ok)throw new Error(j.error||'ERRO');m.style.color='#1d7a4d';m.textContent='Conectado! Pasta principal: '+j.folder}).catch(function(x){m.textContent='Não conectou: '+(x.message||'sem resposta')+'. Confira a implantação do Apps Script.'})};
 /* ---- novos quadros ---- */
 $('#bf').onsubmit=function(e){e.preventDefault();var f=e.target.elements,n=f.n.value.trim(),ss=[];f.s.value.split('\n').forEach(function(x){x=x.trim();if(x&&ss.indexOf(x)<0)ss.push(x)});
 f.n.classList.toggle('err',!n);if(!n||ss.length<2){flash('Informe o nome e pelo menos 2 etapas.');return}
@@ -436,7 +471,7 @@ var en=log(tab,'importou '+n+' card'+(n>1?'s':'')+' da planilha "'+IM.name+'"');
 if(cloud){api('PATCH','cards',add).catch(bad);api('POST','log',en).catch(bad)}else ls();
 flash(n+' card'+(n>1?'s importados':' importado')+(sk?' ('+sk+' já existiam)':'')+'.')})};
 /* ---- login ---- */
-function enter(){$('#login').hidden=true;$('#app').hidden=false;$('#bn').hidden=cloud;chip();sync(true);load().then(function(d){setS(d);ui()}).catch(function(x){sync(false,x);flash('Erro ao carregar: '+diag(x));ui()});setInterval(refresh,5000)}
+function enter(){$('#login').hidden=true;$('#app').hidden=false;$('#bn').hidden=cloud;chip();sync(true);load().then(function(d){lastSig=JSON.stringify([d.cards,d.boards,d.config]);setS(d);ui()}).catch(function(x){sync(false,x);flash('Erro ao carregar: '+diag(x));ui()});setInterval(refresh,5000)}
 function lerr(x){var m=String(x&&x.message||''),s='E-mail ou senha incorretos.';
 if(/REFERER|REFERRER/.test(m))s='A chave do Firebase está restrita a outros domínios.';
 else if(/INVALID_LOGIN|INVALID_PASSWORD|EMAIL_NOT_FOUND|INVALID_EMAIL/.test(m))s='E-mail ou senha incorretos.';
